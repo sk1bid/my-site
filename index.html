@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Authentic Game Development</title>
+  <!-- minimal CSS inlined for portability -->
+  <style>
+    :root { --bg:#80a0ad; --fg:#272424; --accent:#cbe3e2; --card:#3b8766; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family: system-ui, sans-serif; line-height:1.55; background:var(--bg); color:var(--fg); }
+    header{ padding:4rem 1rem; text-align:center; }
+    header h1{ font-size:clamp(2.2rem,4vw+1rem,4rem); margin-bottom:1rem; }
+    header p{ max-width:55ch; margin-inline:auto; opacity:.85; }
+    section{ padding:3rem 1rem; max-width:1000px; margin:auto; }
+    h2{ color:var(--accent); margin-bottom:1.2rem; text-transform:uppercase; letter-spacing:.02em; }
+    .cards{ display:grid; gap:1rem; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
+    .card{ background:var(--card); padding:1rem; border-radius:8px; display:flex; flex-direction:column; align-items:center; text-align:center; }
+    .card img{ max-width:100%; border-radius:6px; margin-bottom:.5rem; }
+    .card a{ color:var(--accent); text-decoration:none; font-weight:700; margin-top:auto; }
+    footer{ text-align:center; padding:2.5rem 1rem; font-size:.875rem; opacity:.6; }
+    /* simple iframe modal */
+    #overlay{ position:fixed; inset:0; background:#000c; display:none; align-items:center; justify-content:center; }
+    #overlay iframe{ width:90vw; height:90vh; border:none; border-radius:8px; box-shadow:0 0 30px #000; }
+  </style>
+  <script>
+    function openGame(src){
+      const o=document.getElementById('overlay');
+      const frame=o.querySelector('iframe');
+      frame.src=src; o.style.display='flex';
+    }
+    function closeGame(){ document.getElementById('overlay').style.display='none'; }
+  </script>
+</head>
+<body>
+  <header id="about">
+    <h1>My Tiny Game Hub</h1>
+    <p>Practise DevOps in simple GameDev (RayLib C + WebAssembly)</p>
+  </header>
+
+  <section id="games">
+    <h2>Play Now</h2>
+    <div class="cards">
+      <!-- Example card; duplicate and change href/cover/title per game -->
+      <div class="card">
+        <img src="covers/doodler.png"/>
+        <strong>Doodler</strong>
+        <a href="#" onclick="openGame('doodler/index.html')">Play ▶</a>
+      </div>
+    </div>
+  </section>
+
+  
+
+  <footer>
+    2025 Ivanov Artem 
+  </footer>
+
+  <!-- modal overlay -->
+  <div id="overlay" onclick="closeGame()"><iframe></iframe></div>
+</body>
+</html>
