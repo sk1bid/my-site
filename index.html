@@ -1,62 +1,165 @@
+<!-- index.html – адаптивный вариант под все экраны -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Authentic Game Development</title>
-  <!-- minimal CSS inlined for portability -->
-  <style>
-    :root { --bg:#80a0ad; --fg:#272424; --accent:#cbe3e2; --card:#3b8766; }
-    * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family: system-ui, sans-serif; line-height:1.55; background:var(--bg); color:var(--fg); }
-    header{ padding:4rem 1rem; text-align:center; }
-    header h1{ font-size:clamp(2.2rem,4vw+1rem,4rem); margin-bottom:1rem; }
-    header p{ max-width:55ch; margin-inline:auto; opacity:.85; }
-    section{ padding:3rem 1rem; max-width:1000px; margin:auto; }
-    h2{ color:var(--accent); margin-bottom:1.2rem; text-transform:uppercase; letter-spacing:.02em; }
-    .cards{ display:grid; gap:1rem; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
-    .card{ background:var(--card); padding:1rem; border-radius:8px; display:flex; flex-direction:column; align-items:center; text-align:center; }
-    .card img{ max-width:100%; border-radius:6px; margin-bottom:.5rem; }
-    .card a{ color:var(--accent); text-decoration:none; font-weight:700; margin-top:auto; }
-    footer{ text-align:center; padding:2.5rem 1rem; font-size:.875rem; opacity:.6; }
-    /* simple iframe modal */
-    #overlay{ position:fixed; inset:0; background:#000c; display:none; align-items:center; justify-content:center; }
-    #overlay iframe{ width:90vw; height:90vh; border:none; border-radius:8px; box-shadow:0 0 30px #000; }
-  </style>
-  <script>
-    function openGame(src){
-      const o=document.getElementById('overlay');
-      const frame=o.querySelector('iframe');
-      frame.src=src; o.style.display='flex';
-    }
-    function closeGame(){ document.getElementById('overlay').style.display='none'; }
-  </script>
+<meta charset="utf-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>My Tiny Game Hub</title>
+
+<style>
+:root{
+  --bg:#80a0ad; --fg:#272424; --accent:#cbe3e2; --card:#3b8766;
+  --asp-w:9; --asp-h:16;          /* базовое соотношение сторон игры */
+  --vh:1vh;                       /* fallback для старых моб. браузеров */
+}
+/* ===== базовая типографика и сетка ===== */
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:system-ui,sans-serif;line-height:1.55;
+  background:var(--bg);color:var(--fg);
+}
+header{padding:4rem 1rem;text-align:center}
+header h1{font-size:clamp(2rem,4vw+1rem,4rem);margin-bottom:1rem}
+header p{max-width:55ch;margin-inline:auto;opacity:.85}
+
+section{padding:3rem 1rem;max-width:1000px;margin:auto}
+h2{color:var(--accent);margin-bottom:1.2rem;text-transform:uppercase;letter-spacing:.02em}
+
+.cards{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.card{
+  background:var(--card);padding:1rem;border-radius:8px;
+  display:flex;flex-direction:column;align-items:center;text-align:center
+}
+.card img{max-width:100%;border-radius:6px;margin-bottom:.5rem}
+.card a{color:var(--accent);text-decoration:none;font-weight:700;margin-top:auto}
+
+footer{text-align:center;padding:2.5rem 1rem;font-size:.875rem;opacity:.6}
+
+/* ===== Overlay ===== */
+#overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.75);
+  align-items:center;justify-content:center;
+  z-index:1000;overscroll-behavior:contain;
+}
+
+/* Игровой iframe */
+#gameFrame{
+  aspect-ratio:var(--asp-w)/var(--asp-h);
+
+  /* 1️⃣ Пытаемся использовать современные динамические единицы */
+  @supports (height: 100dvh){
+    width :min(100vw,calc(100dvh*(var(--asp-w)/var(--asp-h))));
+    height:min(100dvh,calc(100vw*(var(--asp-h)/var(--asp-w))));
+  }
+  /* 2️⃣ Фолбэк для старых браузеров — через кастомный --vh */
+  @supports not (height: 100dvh){
+    width :min(100vw,calc(var(--vh,1vh)*100*(var(--asp-w)/var(--asp-h))));
+    height:min(calc(var(--vh,1vh)*100),
+               calc(100vw*(var(--asp-h)/var(--asp-w))));
+  }
+
+  border:none;border-radius:8px;box-shadow:0 0 30px #000;
+  display:block;background:#000;      /* на всякий случай */
+}
+
+/* Спиннер */
+#spinner{
+  display:none;position:absolute;width:50px;height:50px;
+  border:5px solid rgba(255,255,255,.3);
+  border-top:5px solid var(--accent);
+  border-radius:50%;animation:spin 1s linear infinite;z-index:1001;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ===== Mobile tuning ===== */
+@media (max-width:600px){
+  header{padding:2.5rem 1rem}
+  .cards{grid-template-columns:1fr}      /* одна колонка карточек */
+  .card{padding:.8rem}
+  header h1{font-size:clamp(1.8rem,5vw+1rem,3rem)}
+}
+
+/* ===== Лёгкий «запрет» landscape-режима ===== */
+@media (orientation:landscape) and (max-height:500px){
+  #rotateHint{display:flex}
+}
+#rotateHint{
+  position:fixed;inset:0;z-index:2000;
+  background:#000c;color:#fff;display:none;
+  align-items:center;justify-content:center;text-align:center;
+  padding:2rem;font-size:1.2rem;line-height:1.4
+}
+</style>
+
+<script>
+/* =========== JS-костыль для старых моб. браузеров (обновляем --vh) */
+(function(){
+  function setVH(){
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh',`${vh}px`);
+  }
+  setVH(); window.addEventListener('resize',setVH);
+})();
+
+/* =========== Логика модального окна ========= */
+document.addEventListener('DOMContentLoaded',()=>{
+  const overlay=document.getElementById('overlay');
+  const frame  =document.getElementById('gameFrame');
+  const spin   =document.getElementById('spinner');
+
+  window.openGame = src=>{
+    spin.style.display='block';
+    frame.onload = ()=>spin.style.display='none';
+    frame.src = src;
+    overlay.style.display='flex';
+    document.body.style.overflow='hidden';
+    frame.focus();
+  };
+  window.closeGame = ()=>{
+    overlay.style.display='none';
+    document.body.style.overflow='';
+    frame.src='';
+  };
+
+  overlay.addEventListener('click',e=>{
+    if(e.target===overlay) closeGame();
+  });
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape') closeGame();
+  });
+});
+</script>
 </head>
+
 <body>
-  <header id="about">
+  <header>
     <h1>My Tiny Game Hub</h1>
-    <p>Practise DevOps in simple GameDev (RayLib C + WebAssembly)</p>
+    <p>Practise DevOps in simple GameDev (raylib C + WebAssembly)</p>
   </header>
 
-  <section id="games">
+  <section>
     <h2>Play Now</h2>
     <div class="cards">
-      <!-- Example card; duplicate and change href/cover/title per game -->
       <div class="card">
-        <img src="covers/doodler.png"/>
+        <img src="covers/doodler.png" alt="Doodler cover">
         <strong>Doodler</strong>
         <a href="#" onclick="openGame('doodler/index.html')">Play ▶</a>
       </div>
+      <!-- Добавляйте карточки по образцу -->
     </div>
   </section>
 
-  
+  <footer>© 2025 Ivanov Artem</footer>
 
-  <footer>
-    2025 Ivanov Artem 
-  </footer>
+  <!-- Модальное окно -->
+  <div id="overlay" tabindex="-1">
+    <div id="spinner"></div>
+    <iframe id="gameFrame" tabindex="0"></iframe>
+  </div>
 
-  <!-- modal overlay -->
-  <div id="overlay" onclick="closeGame()"><iframe></iframe></div>
+  <!-- Подсказка «поверните устройство» для экстремально низкого landscape -->
+  <div id="rotateHint">Поверните устройство в портретный режим 🙂</div>
 </body>
 </html>
